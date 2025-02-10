@@ -68,6 +68,6 @@ public class CartItem {
 
     private Integer mrpPrice;
 
-    private Integer sellingPrice; // Fixed camelCase naming
+    private Integer sellingPrice;
 }
 
