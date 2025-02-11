@@ -1,8 +1,12 @@
 package com.shri.springify.Springify.controller;
 
+import com.shri.springify.Springify.domain.USER_ROLE;
 import com.shri.springify.Springify.model.User;
 import com.shri.springify.Springify.repository.UserRepo;
+import com.shri.springify.Springify.response.AuthResponse;
 import com.shri.springify.Springify.response.SignUpRequest;
+import com.shri.springify.Springify.service.AuthService;
+import com.shri.springify.Springify.service.impl.AuthServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,18 +21,34 @@ public class AuthController {
 
     @Autowired
     private UserRepo userRepo;
+
+    @Autowired
+    private  AuthService authService;
     @PostMapping("/signup")
-    public ResponseEntity<User> createUser(@RequestBody SignUpRequest req)
+    public ResponseEntity<AuthResponse> createUser(@RequestBody SignUpRequest req) throws Exception {
+        AuthResponse res=new AuthResponse();
+        try{
+            String jwt=authService.createUser(req);
 
-    {
-        User user=new User();
-         user.setEmail(req.getEmail());
-         user.setFullName(req.getFullName());
-         user.setPassword(req.getPassword());
-User savedUser=userRepo.save(user);
+            res.setJwt(jwt);
+            res.setMessage("signup success");
+            res.setRole(USER_ROLE.ROLE_CUSTOMER);
 
 
-        return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
+            return  new ResponseEntity<>(res,HttpStatus.OK);
+        }
+        catch (Exception e)
+        {
+            res.setRole(null);
+            res.setJwt(null);
+            res.setMessage(e.getMessage());
+            return new ResponseEntity<>(res,HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 
     }
+
+
+
+
+
 }

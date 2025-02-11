@@ -1,4 +1,9 @@
 package com.shri.springify.Springify.service;
 
-public class AuthService {
+import com.shri.springify.Springify.response.SignUpRequest;
+
+public interface AuthService {
+
+
+    String createUser(SignUpRequest req) throws Exception;
 }
