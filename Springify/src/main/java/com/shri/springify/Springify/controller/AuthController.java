@@ -2,8 +2,11 @@ package com.shri.springify.Springify.controller;
 
 import com.shri.springify.Springify.domain.USER_ROLE;
 import com.shri.springify.Springify.model.User;
+import com.shri.springify.Springify.model.VerificationCode;
 import com.shri.springify.Springify.repository.UserRepo;
+import com.shri.springify.Springify.response.ApiResponse;
 import com.shri.springify.Springify.response.AuthResponse;
+import com.shri.springify.Springify.response.LoginRequest;
 import com.shri.springify.Springify.response.SignUpRequest;
 import com.shri.springify.Springify.service.AuthService;
 import com.shri.springify.Springify.service.impl.AuthServiceImpl;
@@ -46,6 +49,60 @@ public class AuthController {
         }
 
     }
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest req) throws Exception {
+        AuthResponse res=new AuthResponse();
+        try{
+            res=authService.login(req);
+
+
+            return  new ResponseEntity<>(res,HttpStatus.OK);
+        }
+        catch (Exception e)
+        {
+            res.setRole(null);
+            res.setJwt(null);
+            res.setMessage(e.getMessage());
+            return new ResponseEntity<>(res,HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+    }
+
+
+    @PostMapping("/sendSignUpOtp")
+    public  ResponseEntity<ApiResponse> sendOtp(@RequestBody VerificationCode req) throws Exception
+    {     ApiResponse res=new ApiResponse();
+        try {
+            authService.sendLoginOtp(req.getEmail());
+            res.setMessage("Otp sent");
+            return new ResponseEntity<>(res,HttpStatus.OK);
+        }
+        catch (Exception e)
+        {
+            System.out.println(e);
+            res.setMessage("Failed to send otp"+e.getMessage());
+            return new ResponseEntity<>(res,HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+    }
+
+    @PostMapping("/sendLoginOtp")
+    public  ResponseEntity<ApiResponse> sendLoginOtp(@RequestBody VerificationCode req) throws Exception
+    {     ApiResponse res=new ApiResponse();
+        try {
+            authService.sendSignupOtp(req.getEmail());
+            res.setMessage("Otp sent");
+            return new ResponseEntity<>(res,HttpStatus.OK);
+        }
+        catch (Exception e)
+        {
+            System.out.println(e);
+            res.setMessage("Failed to send otp"+e.getMessage());
+            return new ResponseEntity<>(res,HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+    }
+
 
 
 
