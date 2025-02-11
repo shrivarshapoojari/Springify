@@ -24,7 +24,7 @@ public class UserController {
     {
         try{
             User user=userService.findUserByJwt(jwt);
-            System.out.println(jwt);
+
             return  new ResponseEntity<>(user, HttpStatus.OK);
         } catch (Exception e) {
 
