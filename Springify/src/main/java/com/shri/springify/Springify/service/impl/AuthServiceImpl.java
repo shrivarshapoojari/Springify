@@ -56,7 +56,7 @@ public class AuthServiceImpl implements AuthService {
    private  final EmailService emailService;
 
    @Autowired
-   private final UserServiceImpl userService;
+   private final UserDetailServiceImpl userService;
     @Override
     public void sendLoginOtp(String email) throws Exception {
 

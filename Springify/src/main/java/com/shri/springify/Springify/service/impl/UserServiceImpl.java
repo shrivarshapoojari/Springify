@@ -1,67 +1,39 @@
 package com.shri.springify.Springify.service.impl;
 
-import com.shri.springify.Springify.domain.USER_ROLE;
-import com.shri.springify.Springify.model.Seller;
+import com.shri.springify.Springify.config.JwtProvider;
 import com.shri.springify.Springify.model.User;
-import com.shri.springify.Springify.repository.SellerRepo;
 import com.shri.springify.Springify.repository.UserRepo;
+import com.shri.springify.Springify.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserDetailsService {
-   @Autowired
-    private UserRepo userrepo;
+public class UserServiceImpl implements UserService {
 
-   @Autowired
-   private SellerRepo sellerRepo;
-
-
-
-   private static  final  String SELLER_PREFIX="seller_";
+    private  final UserRepo userRepo;
+    private  final JwtProvider jwtProvider;
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        if(username.startsWith(SELLER_PREFIX))
-        {
-            String actualUserName=username.substring(SELLER_PREFIX.length());
-            Seller seller=sellerRepo.findByEmail(actualUserName);
-
-            if(seller!=null)
-            {
-                return  buildUserDetails(seller.getEmail(),seller.getPassword(),seller.getRole());
-            }
-        }
-        else {
-            User user=userrepo.findByEmail(username);
-            if(user!=null)
-            {
-                return  buildUserDetails(user.getEmail(),user.getPassword(),user.getRole());
-            }
-        }
+    public User findUserByJwt(String jwt) throws Exception {
 
 
-        throw  new UsernameNotFoundException("user not found with email "+username);
+            String email= jwtProvider.getEmailFromJwtToken(jwt);
+
+
+        return this.findUserByEmail(email);
+
+
+
     }
 
-    private UserDetails buildUserDetails(String email, String password, USER_ROLE role) {
+    @Override
+    public User findUserByEmail(String email) throws Exception {
 
-       if(role==null)
-           role=USER_ROLE.ROLE_CUSTOMER;
+        User user= userRepo.findByEmail(email);
+        if(user==null)
+            throw new Exception("User not found");
 
-       List<GrantedAuthority> authorityList=new ArrayList<>();
-       authorityList.add(new SimpleGrantedAuthority(String.valueOf(role)));
-
-       return new org.springframework.security.core.userdetails.User(email,password,authorityList);
-
+        return  user;
     }
 }
