@@ -4,10 +4,7 @@ import com.shri.springify.Springify.domain.USER_ROLE;
 import com.shri.springify.Springify.model.User;
 import com.shri.springify.Springify.model.VerificationCode;
 import com.shri.springify.Springify.repository.UserRepo;
-import com.shri.springify.Springify.response.ApiResponse;
-import com.shri.springify.Springify.response.AuthResponse;
-import com.shri.springify.Springify.response.LoginRequest;
-import com.shri.springify.Springify.response.SignUpRequest;
+import com.shri.springify.Springify.response.*;
 import com.shri.springify.Springify.service.AuthService;
 import com.shri.springify.Springify.service.impl.AuthServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,7 +70,7 @@ public class AuthController {
     public  ResponseEntity<ApiResponse> sendOtp(@RequestBody VerificationCode req) throws Exception
     {     ApiResponse res=new ApiResponse();
         try {
-            authService.sendLoginOtp(req.getEmail());
+            authService.sendSignupOtp(req.getEmail());
             res.setMessage("Otp sent");
             return new ResponseEntity<>(res,HttpStatus.OK);
         }
@@ -87,10 +84,10 @@ public class AuthController {
     }
 
     @PostMapping("/sendLoginOtp")
-    public  ResponseEntity<ApiResponse> sendLoginOtp(@RequestBody VerificationCode req) throws Exception
+    public  ResponseEntity<ApiResponse> sendLoginOtp(@RequestBody LoginOtpRequest req) throws Exception
     {     ApiResponse res=new ApiResponse();
         try {
-            authService.sendSignupOtp(req.getEmail());
+            authService.sendLoginOtp(req.getEmail(),req.getRole());
             res.setMessage("Otp sent");
             return new ResponseEntity<>(res,HttpStatus.OK);
         }

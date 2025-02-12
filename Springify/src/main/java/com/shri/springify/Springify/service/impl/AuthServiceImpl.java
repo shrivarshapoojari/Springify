@@ -5,9 +5,11 @@ import com.shri.springify.Springify.Utils.OtpUtil;
 import com.shri.springify.Springify.config.JwtProvider;
 import com.shri.springify.Springify.domain.USER_ROLE;
 import com.shri.springify.Springify.model.Cart;
+import com.shri.springify.Springify.model.Seller;
 import com.shri.springify.Springify.model.User;
 import com.shri.springify.Springify.model.VerificationCode;
 import com.shri.springify.Springify.repository.CartRepo;
+import com.shri.springify.Springify.repository.SellerRepo;
 import com.shri.springify.Springify.repository.UserRepo;
 import com.shri.springify.Springify.repository.VerificationCodeRepo;
 import com.shri.springify.Springify.response.AuthResponse;
@@ -37,8 +39,12 @@ import java.util.List;
 @RequiredArgsConstructor
 @Data
 public class AuthServiceImpl implements AuthService {
+
+    private static  final  String SELLER_PREFIX="seller_";
    @Autowired
     private  final UserRepo userRepo;
+   @Autowired
+    private  final SellerRepo sellerRepo;
 
    @Autowired
    private  final PasswordEncoder passwordEncoder;
@@ -58,26 +64,50 @@ public class AuthServiceImpl implements AuthService {
    @Autowired
    private final UserDetailServiceImpl userService;
     @Override
-    public void sendLoginOtp(String email) throws Exception {
+    public void sendLoginOtp(String email,USER_ROLE role) throws Exception {
+          if(role.equals(USER_ROLE.ROLE_SELLER))
+          {
 
-        User user=userRepo.findByEmail(email);
-        if(user==null)
-            throw new Exception("User not found");
+              Seller seller = sellerRepo.findByEmail(email);
+              if (seller == null)
+                  throw new Exception("seller not found");
 
-        VerificationCode isExist=verificationCodeRepo.findByEmail(email);
-        if(isExist!=null)
-            verificationCodeRepo.delete(isExist);
+              VerificationCode isExist = verificationCodeRepo.findByEmail(email);
+              if (isExist != null)
+                  verificationCodeRepo.delete(isExist);
 
-        String otp= OtpUtil.generateOtp();
-        VerificationCode verificationCode=new VerificationCode();
-        verificationCode.setEmail(email);
-        verificationCode.setOtp(otp);
-        verificationCodeRepo.save(verificationCode);
+              String otp = OtpUtil.generateOtp();
+              VerificationCode verificationCode = new VerificationCode();
+              verificationCode.setEmail(email);
+              verificationCode.setOtp(otp);
+              verificationCodeRepo.save(verificationCode);
 
-        String sub="Otp for Logging into Springify";
-        String text="your otp to login is " + otp;
-        emailService.sendVerificationEmail(email,otp,sub,text);
+              String sub = "Otp for Logging into Springify";
+              String text = "your otp to login as seller is " + otp;
+              emailService.sendVerificationEmail(email, otp, sub, text);
 
+          }
+          else {
+
+
+              User user = userRepo.findByEmail(email);
+              if (user == null)
+                  throw new Exception("User not found");
+
+              VerificationCode isExist = verificationCodeRepo.findByEmail(email);
+              if (isExist != null)
+                  verificationCodeRepo.delete(isExist);
+
+              String otp = OtpUtil.generateOtp();
+              VerificationCode verificationCode = new VerificationCode();
+              verificationCode.setEmail(email);
+              verificationCode.setOtp(otp);
+              verificationCodeRepo.save(verificationCode);
+
+              String sub = "Otp for Logging into Springify";
+              String text = "your otp to login is " + otp;
+              emailService.sendVerificationEmail(email, otp, sub, text);
+          }
     }
     @Override
     public void sendSignupOtp(String email) throws Exception {

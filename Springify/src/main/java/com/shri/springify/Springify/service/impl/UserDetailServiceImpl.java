@@ -28,30 +28,25 @@ public class UserDetailServiceImpl implements UserDetailsService {
 
 
 
-   private static  final  String SELLER_PREFIX="seller_";
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        if(username.startsWith(SELLER_PREFIX))
-        {
-            String actualUserName=username.substring(SELLER_PREFIX.length());
-            Seller seller=sellerRepo.findByEmail(actualUserName);
-
-            if(seller!=null)
-            {
-                return  buildUserDetails(seller.getEmail(),seller.getPassword(),seller.getRole());
-            }
-        }
-        else {
-            User user=userrepo.findByEmail(username);
-            if(user!=null)
-            {
-                return  buildUserDetails(user.getEmail(),user.getPassword(),user.getRole());
-            }
+        Seller seller = sellerRepo.findByEmail(username);
+        if (seller != null) {
+            return buildUserDetails(seller.getEmail(), seller.getPassword(), seller.getRole());
         }
 
+        User user = userrepo.findByEmail(username);
+        if (user != null) {
+            return buildUserDetails(user.getEmail(), user.getPassword(), user.getRole());
+        }
 
-        throw  new UsernameNotFoundException("user not found with email "+username);
+        throw new UsernameNotFoundException("User not found with email: " + username);
     }
+
+
+
+
 
     private UserDetails buildUserDetails(String email, String password, USER_ROLE role) {
 
