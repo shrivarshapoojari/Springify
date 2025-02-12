@@ -1,9 +1,11 @@
 package com.shri.springify.Springify.controller;
 
 import com.shri.springify.Springify.Utils.OtpUtil;
+import com.shri.springify.Springify.domain.AccountStatus;
 import com.shri.springify.Springify.model.Seller;
 import com.shri.springify.Springify.model.VerificationCode;
 import com.shri.springify.Springify.repository.VerificationCodeRepo;
+import com.shri.springify.Springify.response.ApiResponse;
 import com.shri.springify.Springify.response.AuthResponse;
 import com.shri.springify.Springify.response.LoginRequest;
 import com.shri.springify.Springify.service.AuthService;
@@ -13,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/seller")
@@ -61,7 +65,7 @@ public class SellerController {
         return  new ResponseEntity<>(seller,HttpStatus.OK);
     }
 
-    @PostMapping("/signUp")
+    @PostMapping("/signup")
     public ResponseEntity<Seller> createSeller(@RequestBody Seller seller) throws Exception {
         Seller savedSeller=sellerService.createSeller(seller);
         String otp= OtpUtil.generateOtp();
@@ -90,4 +94,41 @@ public class SellerController {
     }
 
 
+    @GetMapping("/profile")
+    public  ResponseEntity<Seller> getSellerByJwt(
+            @RequestHeader("Authorization") String jwt
+    ) throws  Exception
+    {
+        Seller seller=sellerService.getSellerProfile(jwt);
+        return  new ResponseEntity<>(seller,HttpStatus.OK);
+    }
+
+
+    @GetMapping("/getAllSellers"
+    )
+    public  ResponseEntity<List<Seller>> getAllSeller(@RequestParam AccountStatus accountStatus)
+
+    {
+        List<Seller> sellers=sellerService.getAllSellers(accountStatus);
+        return  new ResponseEntity<>(sellers,HttpStatus.OK);
+
+    }
+
+
+    @PatchMapping("/update")
+   public ResponseEntity<Seller> updateSeller(@RequestHeader("Authorization") String jwt,
+    @RequestBody Seller seller
+    ) throws Exception {
+        Seller sellerProfile=sellerService.getSellerProfile(jwt);
+        Seller updatedSeller=sellerService.updateSeller(sellerProfile.getId(),seller);
+        return  new ResponseEntity<>(updatedSeller,HttpStatus.OK);
+
+    }
+    @DeleteMapping("/delete/{id}")
+    public  ResponseEntity<ApiResponse> deleteSeller(@PathVariable Long id) throws Exception {
+        sellerService.deleteSeller(id);
+        ApiResponse response=new ApiResponse();
+        response.setMessage("Deleted account successfully");
+        return new ResponseEntity<>(response,HttpStatus.OK);
+    }
 }

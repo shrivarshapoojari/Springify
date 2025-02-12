@@ -132,6 +132,10 @@ public class Seller {
     @Enumerated(EnumType.STRING)
     private AccountStatus accountStatus = AccountStatus.PENDING_VERIFICATION;
 
-    @OneToOne
+
+
+
+    @OneToOne(mappedBy = "seller", cascade = CascadeType.ALL, orphanRemoval = true)
     private Address pickupAddress;
+
 }

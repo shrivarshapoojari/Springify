@@ -37,6 +37,8 @@
 
 package com.shri.springify.Springify.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -74,7 +76,14 @@ public class Address {
     private String mobile;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user; // Added reference to User
+    @JsonIgnore
+    @JoinColumn(name = "user_id", nullable = true)
+    private User user;
+
+
+    @OneToOne
+    @JsonIgnoreProperties("pickupAddress")
+    @JoinColumn(name = "seller_id", unique = true, nullable = true)   
+    private Seller seller;
 }
 

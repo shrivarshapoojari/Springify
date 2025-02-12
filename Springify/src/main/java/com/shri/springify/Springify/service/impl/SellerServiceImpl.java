@@ -4,6 +4,8 @@ import com.shri.springify.Springify.config.JwtProvider;
 import com.shri.springify.Springify.domain.AccountStatus;
 import com.shri.springify.Springify.domain.USER_ROLE;
 import com.shri.springify.Springify.model.Address;
+import com.shri.springify.Springify.model.BankDetails;
+import com.shri.springify.Springify.model.BusinessDetails;
 import com.shri.springify.Springify.model.Seller;
 import com.shri.springify.Springify.repository.AddressRepo;
 import com.shri.springify.Springify.repository.SellerRepo;
@@ -42,26 +44,111 @@ public class SellerServiceImpl implements SellerService {
         return this.getSellerByEmail(email);
     }
 
-    @Override
-    public Seller createSeller(Seller seller) throws Exception {
-          Seller sellerExist=sellerRepo.findByEmail(seller.getEmail());
-          if(sellerExist!=null)
-              throw  new Exception("Seller already exist");
+//    @Override
+//    public Seller createSeller(Seller seller) throws Exception {
+//          Seller sellerExist=sellerRepo.findByEmail(seller.getEmail());
+//          if(sellerExist!=null)
+//              throw  new Exception("Seller already exist");
+//
+//          Address savedAddress=addressRepo.save(seller.getPickupAddress());
+//          Seller newSeller= new Seller();
+//          newSeller.setSellerName(seller.getSellerName());
+//          newSeller.setPassword(passwordEncoder.encode(seller.getPassword()));
+//          newSeller.setEmail(seller.getEmail());
+//
+//          newSeller.setPickupAddress(savedAddress);
+//          newSeller.setRole(USER_ROLE.ROLE_SELLER);
+//          newSeller.setMobile(seller.getMobile());
+//          newSeller.setBankDetails(seller.getBankDetails());
+//          newSeller.setBusinessDetails(seller.getBusinessDetails());
+//          newSeller.setPickupAddress(savedAddress);
+//       Seller savedSeller=  sellerRepo.save(newSeller);
+//         savedAddress.setSeller(savedSeller);
+//         return savedSeller;
+//    }
 
-          Address savedAddress=addressRepo.save(seller.getPickupAddress());
-          Seller newSeller= new Seller();
-          newSeller.setSellerName(seller.getSellerName());
-          newSeller.setPassword(passwordEncoder.encode(seller.getPassword()));
-          newSeller.setEmail(seller.getEmail());
 
-          newSeller.setPickupAddress(savedAddress);
-          newSeller.setRole(USER_ROLE.ROLE_SELLER);
-          newSeller.setMobile(seller.getMobile());
-          newSeller.setBankDetails(seller.getBankDetails());
-          newSeller.setBusinessDetails(seller.getBusinessDetails());
 
-        return sellerRepo.save(newSeller);
+
+
+
+
+
+
+
+@Override
+public Seller createSeller(Seller seller) throws Exception {
+    Seller sellerExist = sellerRepo.findByEmail(seller.getEmail());
+    if (sellerExist != null) {
+        throw new Exception("Seller already exists");
     }
+
+    Address pickupAddress = new Address();
+    pickupAddress.setName(seller.getPickupAddress().getName());
+    pickupAddress.setLocality(seller.getPickupAddress().getLocality());
+    pickupAddress.setAddress(seller.getPickupAddress().getAddress());
+    pickupAddress.setCity(seller.getPickupAddress().getCity());
+    pickupAddress.setState(seller.getPickupAddress().getState());
+    pickupAddress.setPinCode(seller.getPickupAddress().getPinCode());
+    pickupAddress.setMobile(seller.getPickupAddress().getMobile());
+
+    Address savedAddress = addressRepo.save(pickupAddress);
+
+    Seller newSeller = new Seller();
+    newSeller.setSellerName(seller.getSellerName());
+    newSeller.setPassword(passwordEncoder.encode(seller.getPassword()));
+    newSeller.setEmail(seller.getEmail());
+    newSeller.setRole(USER_ROLE.ROLE_SELLER);
+    newSeller.setMobile(seller.getMobile());
+
+    BankDetails bankDetails = new BankDetails();
+    if (seller.getBankDetails() != null) {
+        System.out.println(seller.getBankDetails());
+        bankDetails.setAccountNumber(seller.getBankDetails().getAccountNumber());
+        bankDetails.setAccountHolderName(seller.getBankDetails().getAccountHolderName());
+        bankDetails.setIfscCode(seller.getBankDetails().getIfscCode());
+    }
+    newSeller.setBankDetails(bankDetails);
+
+    BusinessDetails businessDetails = new BusinessDetails();
+    if (seller.getBusinessDetails() != null) {
+        System.out.println(seller.getBusinessDetails());
+        businessDetails.setBusinessName(seller.getBusinessDetails().getBusinessName());
+        businessDetails.setBusinessMobile(seller.getBusinessDetails().getBusinessMobile());
+        businessDetails.setBusinessEmail(seller.getBusinessDetails().getBusinessEmail());
+        businessDetails.setBusinessAddress(seller.getBusinessDetails().getBusinessAddress());
+        businessDetails.setLogo(seller.getBusinessDetails().getLogo());
+        businessDetails.setBanner(seller.getBusinessDetails().getBanner());
+    } else {
+        businessDetails.setBusinessName("");
+        businessDetails.setBusinessMobile("");
+        businessDetails.setBusinessEmail("");
+        businessDetails.setBusinessAddress("");
+        businessDetails.setLogo("");
+        businessDetails.setBanner("");
+    }
+    newSeller.setBusinessDetails(businessDetails);
+
+    newSeller.setPickupAddress(savedAddress);
+
+    Seller savedSeller = sellerRepo.save(newSeller);
+
+    savedAddress.setSeller(savedSeller);
+
+    return savedSeller;
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
     @Override
     public Seller getSellerById(Long id) throws Exception {
