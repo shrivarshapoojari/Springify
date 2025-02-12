@@ -198,30 +198,138 @@ public Seller createSeller(Seller seller) throws Exception {
 
     @Override
     public Seller updateSeller(Long id, Seller seller) throws Exception {
-         Seller existingSeller=sellerRepo.findById(id).orElseThrow(()-> new Exception("Seller Not found"));
+//         Seller existingSeller=sellerRepo.findById(id).orElseThrow(()-> new Exception("Seller Not found"));
+//
+//         if(seller.getSellerName()!=null)
+//             existingSeller.setSellerName(seller.getSellerName());
+//
+//         if(seller.getMobile()!=null)
+//             existingSeller.setMobile(seller.getMobile());
+//
+//         if(seller.getEmail()!=null)
+//             existingSeller.setEmail(seller.getEmail());
+//
+//
+//        if (seller.getBankDetails() != null) {
+//
+//
+//
+//            BankDetails existingBankDetails = existingSeller.getBankDetails();
+//            if (seller.getBankDetails().getAccountNumber() != null)
+//                existingBankDetails.setAccountNumber(seller.getBankDetails().getAccountNumber());
+//            if (seller.getBankDetails().getAccountHolderName() != null)
+//                existingBankDetails.setAccountHolderName(seller.getBankDetails().getAccountHolderName());
+//            if (seller.getBankDetails().getIfscCode() != null)
+//                existingBankDetails.setIfscCode(seller.getBankDetails().getIfscCode());
+//        }
+//
+//        if (seller.getBusinessDetails() != null) {
+//
+//                existingSeller.setBusinessDetails(new BusinessDetails());
+//
+//            BusinessDetails existingBusinessDetails = existingSeller.getBusinessDetails();
+//            if (seller.getBusinessDetails().getBusinessName() != null)
+//                existingBusinessDetails.setBusinessName(seller.getBusinessDetails().getBusinessName());
+//            if (seller.getBusinessDetails().getBusinessMobile() != null)
+//                existingBusinessDetails.setBusinessMobile(seller.getBusinessDetails().getBusinessMobile());
+//            if (seller.getBusinessDetails().getBusinessEmail() != null)
+//                existingBusinessDetails.setBusinessEmail(seller.getBusinessDetails().getBusinessEmail());
+//            if (seller.getBusinessDetails().getBusinessAddress() != null)
+//                existingBusinessDetails.setBusinessAddress(seller.getBusinessDetails().getBusinessAddress());
+//            if (seller.getBusinessDetails().getLogo() != null)
+//                existingBusinessDetails.setLogo(seller.getBusinessDetails().getLogo());
+//            if (seller.getBusinessDetails().getBanner() != null)
+//                existingBusinessDetails.setBanner(seller.getBusinessDetails().getBanner());
+//        }
+//
+//
+//            if(seller.getPickupAddress()!=null)
+//             existingSeller.setPickupAddress(seller.getPickupAddress());
+//
+//
+//
+//
+//
+//         return  sellerRepo.save(existingSeller);
 
-         if(seller.getSellerName()!=null)
-             existingSeller.setSellerName(seller.getSellerName());
-
-         if(seller.getMobile()!=null)
-             existingSeller.setMobile(seller.getMobile());
-
-         if(seller.getEmail()!=null)
-             existingSeller.setEmail(seller.getEmail());
 
 
-         if(seller.getBusinessDetails()!=null)
-             existingSeller.setBusinessDetails(seller.getBusinessDetails());
+        Seller existingSeller = sellerRepo.findById(id)
+                .orElseThrow(() -> new Exception("Seller not found"));
 
-         if(seller.getBankDetails()!=null)
-             existingSeller.setBankDetails(seller.getBankDetails());
+        if (seller.getSellerName() != null)
+            existingSeller.setSellerName(seller.getSellerName());
+
+        if (seller.getEmail() != null)
+            existingSeller.setEmail(seller.getEmail());
+
+        if (seller.getPassword() != null)
+            existingSeller.setPassword(passwordEncoder.encode(seller.getPassword()));
+
+        if (seller.getMobile() != null)
+            existingSeller.setMobile(seller.getMobile());
+
+        if (seller.getRole() != null)
+            existingSeller.setRole(seller.getRole());
 
 
-         if(seller.getPickupAddress()!=null)
-             existingSeller.setPickupAddress(seller.getPickupAddress());
+        if (seller.getBankDetails() != null) {
+            if (existingSeller.getBankDetails() == null)
+                existingSeller.setBankDetails(new BankDetails());
+
+            BankDetails existingBankDetails = existingSeller.getBankDetails();
+            if (seller.getBankDetails().getAccountNumber() != null)
+                existingBankDetails.setAccountNumber(seller.getBankDetails().getAccountNumber());
+            if (seller.getBankDetails().getAccountHolderName() != null)
+                existingBankDetails.setAccountHolderName(seller.getBankDetails().getAccountHolderName());
+            if (seller.getBankDetails().getIfscCode() != null)
+                existingBankDetails.setIfscCode(seller.getBankDetails().getIfscCode());
+        }
 
 
-         return  sellerRepo.save(existingSeller);
+        if (seller.getBusinessDetails() != null) {
+            if (existingSeller.getBusinessDetails() == null)
+                existingSeller.setBusinessDetails(new BusinessDetails());
 
+            BusinessDetails existingBusinessDetails = existingSeller.getBusinessDetails();
+            if (seller.getBusinessDetails().getBusinessName() != null)
+                existingBusinessDetails.setBusinessName(seller.getBusinessDetails().getBusinessName());
+            if (seller.getBusinessDetails().getBusinessMobile() != null)
+                existingBusinessDetails.setBusinessMobile(seller.getBusinessDetails().getBusinessMobile());
+            if (seller.getBusinessDetails().getBusinessEmail() != null)
+                existingBusinessDetails.setBusinessEmail(seller.getBusinessDetails().getBusinessEmail());
+            if (seller.getBusinessDetails().getBusinessAddress() != null)
+                existingBusinessDetails.setBusinessAddress(seller.getBusinessDetails().getBusinessAddress());
+            if (seller.getBusinessDetails().getLogo() != null)
+                existingBusinessDetails.setLogo(seller.getBusinessDetails().getLogo());
+            if (seller.getBusinessDetails().getBanner() != null)
+                existingBusinessDetails.setBanner(seller.getBusinessDetails().getBanner());
+        }
+
+
+        if (seller.getPickupAddress() != null) {
+            if (existingSeller.getPickupAddress() == null)
+                existingSeller.setPickupAddress(new Address());
+
+            Address existingAddress = existingSeller.getPickupAddress();
+            if (seller.getPickupAddress().getName() != null)
+                existingAddress.setName(seller.getPickupAddress().getName());
+            if (seller.getPickupAddress().getLocality() != null)
+                existingAddress.setLocality(seller.getPickupAddress().getLocality());
+            if (seller.getPickupAddress().getAddress() != null)
+                existingAddress.setAddress(seller.getPickupAddress().getAddress());
+            if (seller.getPickupAddress().getCity() != null)
+                existingAddress.setCity(seller.getPickupAddress().getCity());
+            if (seller.getPickupAddress().getState() != null)
+                existingAddress.setState(seller.getPickupAddress().getState());
+            if (seller.getPickupAddress().getPinCode() != null)
+                existingAddress.setPinCode(seller.getPickupAddress().getPinCode());
+            if (seller.getPickupAddress().getMobile() != null)
+                existingAddress.setMobile(seller.getPickupAddress().getMobile());
+
+            addressRepo.save(existingAddress);
+        }
+
+        return sellerRepo.save(existingSeller);
     }
 }

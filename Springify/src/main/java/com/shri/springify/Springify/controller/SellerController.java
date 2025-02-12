@@ -51,7 +51,7 @@ public class SellerController {
     }
 
 
-    @PatchMapping("/verify/")
+    @PatchMapping("/verify")
     public  ResponseEntity<Seller>verifySellerEmail(@RequestBody VerificationCode req) throws Exception {
         VerificationCode verificationCode=verificationCodeRepo.findByEmail(req.getEmail());
         if(verificationCode==null)
@@ -115,6 +115,7 @@ public class SellerController {
     }
 
 
+
     @PatchMapping("/update")
    public ResponseEntity<Seller> updateSeller(@RequestHeader("Authorization") String jwt,
     @RequestBody Seller seller
@@ -124,6 +125,7 @@ public class SellerController {
         return  new ResponseEntity<>(updatedSeller,HttpStatus.OK);
 
     }
+
     @DeleteMapping("/delete/{id}")
     public  ResponseEntity<ApiResponse> deleteSeller(@PathVariable Long id) throws Exception {
         sellerService.deleteSeller(id);
