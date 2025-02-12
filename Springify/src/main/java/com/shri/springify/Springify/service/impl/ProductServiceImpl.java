@@ -7,12 +7,21 @@ import com.shri.springify.Springify.repository.CategoryRepo;
 import com.shri.springify.Springify.repository.ProductRepo;
 import com.shri.springify.Springify.response.CreateProductRequest;
 import com.shri.springify.Springify.service.ProductService;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.Period;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ProductServiceImpl  implements ProductService {
@@ -77,18 +86,33 @@ return productRepo.save(product);
     }
 
     @Override
-    public void deleteProduct(Long productId) {
+    public void deleteProduct(Long productId) throws Exception {
+
+        Product product=this.findProductById(productId);
+
+        productRepo.delete(product);
 
     }
 
     @Override
-    public Product updateProduct(Long productId, Product product) {
-        return null;
+    public Product updateProduct(Long productId, Product product) throws Exception {
+
+      this.findProductById(productId);
+        product.setId(productId);
+        return productRepo.save(product);
     }
 
     @Override
-    public Product findProductById(Long id) {
-        return null;
+    public Product findProductById(Long id) throws Exception {
+
+        Optional<Product>product=productRepo.findById(id);
+
+        if(product.isEmpty())
+            throw new Exception("Product not found");
+
+
+        return product.get();
+
     }
 
     @Override
@@ -97,8 +121,67 @@ return productRepo.save(product);
     }
 
     @Override
-    public Page<Product> getAllProducts(String category, String brand, String colors, String size, Integer maxPrice, Integer minPrice, Integer minDiscount, String sort, String stock, Integer pageNumber) {
-        return null;
+    public Page<Product> getAllProducts(String category, String brand, String colors, String size, Integer maxPrice, Integer minPrice, Integer minDiscount, String sort, String stock, Integer pageNumber)
+
+    {
+
+        Specification<Product> spec = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            // Category filter
+            if (category != null) {
+                Join<Product, Category> categoryJoin = root.join("category");
+                predicates.add(criteriaBuilder.equal(categoryJoin.get("categoryId"), category));
+            }
+
+            // Brand filter
+            if (brand != null) {
+                predicates.add(criteriaBuilder.equal(root.get("brand"), brand));
+            }
+
+            // Color filter
+            if (colors != null) {
+                predicates.add(criteriaBuilder.equal(root.get("color"), colors));
+            }
+
+            // Size filter
+            if (size != null) {
+                predicates.add(criteriaBuilder.equal(root.get("size"), size));
+            }
+
+            // Price range filter
+            if (minPrice != null) {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("sellingPrice"), minPrice));
+            }
+            if (maxPrice != null) {
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("sellingPrice"), maxPrice));
+            }
+
+            // Minimum discount filter
+            if (minDiscount != null) {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("discountPercentage"), minDiscount));
+            }
+
+            if(stock!=null)
+                predicates.add(criteriaBuilder.equal(root.get("stock"),stock));
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+
+
+        Sort sorting = Sort.unsorted();
+        if (sort != null) {
+            if (sort.equalsIgnoreCase("priceAsc")) {
+                sorting = Sort.by(Sort.Order.asc("sellingPrice"));
+            } else if (sort.equalsIgnoreCase("priceDesc")) {
+                sorting = Sort.by(Sort.Order.desc("sellingPrice"));
+            } else if (sort.equalsIgnoreCase("discountDesc")) {
+                sorting = Sort.by(Sort.Order.desc("discountPercentage"));
+            }
+        }
+
+        Pageable pageable = PageRequest.of(pageNumber != null ? pageNumber : 0, 10);
+        return productRepo.findAll(spec, pageable);
     }
 
     @Override
