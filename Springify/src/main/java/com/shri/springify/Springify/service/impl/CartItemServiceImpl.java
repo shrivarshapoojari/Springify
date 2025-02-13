@@ -32,11 +32,10 @@ public class CartItemServiceImpl implements CartItemService {
             throw new Exception("Unauthorised to update cart");
 
         item.setQuantity(cartItem.getQuantity());
-        item.setMrpPrice(item.getMrpPrice()*cartItem.getQuantity());
-        item.setSellingPrice(item.getQuantity()* item.getSellingPrice());
 
 
-        return  cartItemRepo.save(cartItem);
+
+        return  cartItemRepo.save(item);
 
 
 

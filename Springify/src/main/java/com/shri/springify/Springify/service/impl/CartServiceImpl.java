@@ -81,6 +81,6 @@ public class CartServiceImpl implements CartService {
         cart.setTotalSellingPrice(totalDiscountPrice);
         cart.setDiscount((totalPrice-totalDiscountPrice)/100);
         cart.setTotalItem(totalItem);
-        return null;
+        return  cart;
     }
 }

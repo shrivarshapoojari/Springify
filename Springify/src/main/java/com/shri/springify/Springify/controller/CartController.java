@@ -30,7 +30,7 @@ public class CartController {
 
     @GetMapping()
     public ResponseEntity<Cart>findUsersCart(
-            @RequestHeader("Authorisation") String jwt
+            @RequestHeader("Authorization") String jwt
     ) throws Exception {
         Cart cart=cartService.findUsersCart(jwt);
         return  new ResponseEntity<>(cart, HttpStatus.OK);
@@ -51,6 +51,8 @@ public class CartController {
 
         return new ResponseEntity<>(item,HttpStatus.OK);
     }
+
+
 
 
     @DeleteMapping("/item/{cartItemId}")

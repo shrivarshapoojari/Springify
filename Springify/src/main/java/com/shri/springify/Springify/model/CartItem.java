@@ -39,12 +39,11 @@ package com.shri.springify.Springify.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class CartItem {
@@ -55,7 +54,7 @@ public class CartItem {
 
     @ManyToOne
     @JsonIgnore
-    @JoinColumn(name = "cart_id", nullable = false)
+    @JoinColumn(name = "cart_id")
     private Cart cart;
 
     @ManyToOne
