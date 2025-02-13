@@ -83,12 +83,12 @@ public class Order {
     @Column(unique = true, nullable = false, length = 50) // Ensuring uniqueness and length limit
     private String orderId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "seller_id", nullable = false)
+//    @ManyToOne
+//    @JoinColumn(name = "seller_id", nullable = false)
     private Long sellerId;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)

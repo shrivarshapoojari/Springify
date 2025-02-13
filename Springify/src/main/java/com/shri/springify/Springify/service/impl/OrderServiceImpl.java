@@ -7,6 +7,7 @@ import com.shri.springify.Springify.repository.AddressRepo;
 import com.shri.springify.Springify.repository.OrderItemRepo;
 import com.shri.springify.Springify.repository.OrderRepo;
 import com.shri.springify.Springify.service.OrderService;
+import com.shri.springify.Springify.service.SellerService;
 import com.shri.springify.Springify.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -20,6 +21,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    SellerService sellerService;
 
 
     @Autowired
@@ -89,27 +93,59 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Order findOrderById(Long id) {
-        return null;
+    public Order findOrderById(Long id) throws Exception {
+
+        return orderRepo.findById(id).orElseThrow(()->new Exception("Order not found"));
     }
 
     @Override
-    public List<Order> usersOrderHistory(String jwt) {
-        return List.of();
+    public List<Order> usersOrderHistory(String jwt) throws Exception {
+
+        Long userId= userService.findUserByJwt(jwt).getId();
+
+        return orderRepo.findByUserId(userId);
+
     }
 
     @Override
-    public List<Order> sellersOrder(Long sellerId) {
-        return List.of();
+    public List<Order> sellersOrder(String jwt) throws Exception {
+
+        Long sellerId=sellerService.getSellerProfile(jwt).getId();
+
+        return orderRepo.findBySellerId(sellerId);
     }
 
     @Override
-    public Order updateOrderStatus(Long orderId, OrderStatus orderStatus) {
-        return null;
+    public Order updateOrderStatus(Long orderId, OrderStatus orderStatus,String jwt) throws Exception {
+
+        Long sellerId=sellerService.getSellerProfile(jwt).getId();
+
+        Order order=this.findOrderById(orderId);
+        Long orderFromSellerId=order.getSellerId();
+
+        if(!Objects.equals(sellerId, orderFromSellerId))
+            throw new Exception("Unauthorised to modify order status");
+
+
+        order.setOrderStatus(orderStatus);
+
+        return orderRepo.save(order);
+
+
+
     }
 
     @Override
-    public Order cancelOrder(Long orderId, String jwt) {
-        return null;
+    public Order cancelOrder(Long orderId, String jwt) throws Exception {
+
+        Long userId=userService.findUserByJwt(jwt).getId();
+        Order order=this.findOrderById(orderId);
+        Long orderFromUserId=order.getUser().getId();
+        if(!Objects.equals(userId, orderFromUserId)) {
+            throw  new Exception("Unauthorised to cancel order");
+
+        }
+        order.setOrderStatus(OrderStatus.CANCELLED);
+        return  orderRepo.save(order);
     }
 }

@@ -9,15 +9,15 @@ import java.util.Set;
 public interface OrderService {
     Set<Order> createOrder(String jwt, Address shippingAddress, Cart cart) throws Exception;
 
-    Order findOrderById(Long id);
+    Order findOrderById(Long id) throws Exception;
 
-    List<Order> usersOrderHistory(String jwt);
+    List<Order> usersOrderHistory(String jwt) throws Exception;
 
-    List<Order> sellersOrder(Long sellerId);
+    List<Order> sellersOrder(String jwt) throws Exception;
 
-    Order updateOrderStatus(Long orderId, OrderStatus orderStatus);
+    Order updateOrderStatus(Long orderId, OrderStatus orderStatus,String jwt) throws Exception;
 
-    Order cancelOrder(Long orderId,String jwt);
+    Order cancelOrder(Long orderId,String jwt) throws Exception;
 
 
 }
