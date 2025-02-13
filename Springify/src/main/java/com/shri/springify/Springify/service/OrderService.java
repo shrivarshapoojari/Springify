@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Set;
 
 public interface OrderService {
-    Set<Order> createOrder(String jwt, Address shippingAddress, Cart cart) throws Exception;
+    Set<Order> createOrder(String jwt, Address shippingAddress) throws Exception;
 
-    Order findOrderById(Long id) throws Exception;
+    Order findOrderById(Long id,String jwt) throws Exception;
 
     List<Order> usersOrderHistory(String jwt) throws Exception;
 
@@ -19,5 +19,5 @@ public interface OrderService {
 
     Order cancelOrder(Long orderId,String jwt) throws Exception;
 
-
+    OrderItem findOrderItemById(Long orderItemId,String jwt) throws Exception;
 }

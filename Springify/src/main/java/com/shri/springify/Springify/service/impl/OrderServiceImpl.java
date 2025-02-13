@@ -6,6 +6,7 @@ import com.shri.springify.Springify.model.*;
 import com.shri.springify.Springify.repository.AddressRepo;
 import com.shri.springify.Springify.repository.OrderItemRepo;
 import com.shri.springify.Springify.repository.OrderRepo;
+import com.shri.springify.Springify.service.CartService;
 import com.shri.springify.Springify.service.OrderService;
 import com.shri.springify.Springify.service.SellerService;
 import com.shri.springify.Springify.service.UserService;
@@ -25,7 +26,8 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     SellerService sellerService;
 
-
+@Autowired
+    CartService cartService;
     @Autowired
     AddressRepo addressRepo;
 
@@ -33,9 +35,9 @@ public class OrderServiceImpl implements OrderService {
     OrderItemRepo orderItemRepo;
 
     @Override
-    public Set<Order> createOrder(String jwt, Address shippingAddress, Cart cart) throws Exception {
+    public Set<Order> createOrder(String jwt, Address shippingAddress) throws Exception {
         User user=userService.findUserByJwt(jwt);
-
+        Cart cart=cartService.findUsersCart(jwt);
         if(!user.getAddresses().contains(shippingAddress))
         {
             user.getAddresses().add(shippingAddress);
@@ -93,9 +95,14 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Order findOrderById(Long id) throws Exception {
+    public Order findOrderById(Long id,String jwt) throws Exception {
 
-        return orderRepo.findById(id).orElseThrow(()->new Exception("Order not found"));
+        Order order =orderRepo.findById(id).orElseThrow(()->new Exception("Order not found"));
+        Long userId=userService.findUserByJwt(jwt).getId();
+        if(!Objects.equals(userId, order.getUser().getId()))
+            throw new Exception("No order found");
+
+        return order;
     }
 
     @Override
@@ -120,7 +127,7 @@ public class OrderServiceImpl implements OrderService {
 
         Long sellerId=sellerService.getSellerProfile(jwt).getId();
 
-        Order order=this.findOrderById(orderId);
+        Order order=this.findOrderById(orderId,jwt);
         Long orderFromSellerId=order.getSellerId();
 
         if(!Objects.equals(sellerId, orderFromSellerId))
@@ -139,7 +146,7 @@ public class OrderServiceImpl implements OrderService {
     public Order cancelOrder(Long orderId, String jwt) throws Exception {
 
         Long userId=userService.findUserByJwt(jwt).getId();
-        Order order=this.findOrderById(orderId);
+        Order order=this.findOrderById(orderId,jwt);
         Long orderFromUserId=order.getUser().getId();
         if(!Objects.equals(userId, orderFromUserId)) {
             throw  new Exception("Unauthorised to cancel order");
@@ -147,5 +154,19 @@ public class OrderServiceImpl implements OrderService {
         }
         order.setOrderStatus(OrderStatus.CANCELLED);
         return  orderRepo.save(order);
+    }
+
+    @Override
+    public OrderItem findOrderItemById(Long orderItemId,String jwt) throws Exception {
+
+        OrderItem orderItem=orderItemRepo.findById(orderItemId).orElseThrow(()->new Exception("item not found"));
+
+        Long userId=userService.findUserByJwt(jwt).getId();
+
+        if(!Objects.equals(orderItem.getUserId(), userId))
+        {
+               throw  new Exception("OrderItem not found");
+        }
+            return  orderItem;
     }
 }
