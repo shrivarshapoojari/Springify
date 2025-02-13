@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -85,17 +86,22 @@ return productRepo.save(product);
     }
 
     @Override
-    public void deleteProduct(Long productId) throws Exception {
+    public void deleteProduct(Long productId, Long sellerId) throws Exception {
 
         Product product=this.findProductById(productId);
-
+        Long creatorId=product.getSeller().getId();
+        if(!Objects.equals(creatorId, sellerId))
+            throw new Exception("You are not authorised to delete this product");
         productRepo.delete(product);
 
     }
 
     @Override
-    public Product updateProduct(Long productId, Product product) throws Exception {
-
+    public Product updateProduct(Long productId, Product product,Long sellerId) throws Exception {
+        Product product1=this.findProductById(productId);
+        Long creatorId=product1.getSeller().getId();
+        if(!Objects.equals(creatorId, sellerId))
+            throw new Exception("You are not authorised to delete this product");
       this.findProductById(productId);
         product.setId(productId);
         return productRepo.save(product);

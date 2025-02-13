@@ -10,9 +10,11 @@ import java.util.List;
 public interface ProductService {
     public Product createProduct(CreateProductRequest req, Seller seller);
 
-    public void deleteProduct(Long productId) throws Exception;
 
-    public Product updateProduct(Long productId,Product product) throws Exception;
+
+    void deleteProduct(Long productId, Long sellerId) throws Exception;
+
+    public Product updateProduct(Long productId, Product product,Long sellerId) throws Exception;
 
     Product findProductById(Long id) throws Exception;
 
