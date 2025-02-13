@@ -75,4 +75,8 @@ public class OrderItem {
     @Column(nullable = false)
     private double sellingPrice; // Changed Integer to double
 
+    @OneToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private Long userId;
+
 }
