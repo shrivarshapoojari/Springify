@@ -21,12 +21,6 @@ public class ProductController {
     private ProductService productService;
 
 
-    @GetMapping("/{productId}")
-    public ResponseEntity<Product> getProductById(@PathVariable Long productId) throws Exception {
-         Product product=productService.findProductById(productId);
-
-         return  new ResponseEntity<>(product, HttpStatus.OK);
-    }
 
     @GetMapping("/search")
     public  ResponseEntity<List<Product>> searchProduct(@RequestParam String query)
@@ -35,7 +29,7 @@ public class ProductController {
         return  new ResponseEntity<>(products,HttpStatus.OK);
     }
 
-    @GetMapping()
+    @GetMapping("/all")
     public ResponseEntity<Page<Product>> getAllProducts(
             @RequestParam(required=false) String category,
             @RequestParam(required=false) String brand,
@@ -50,6 +44,13 @@ public class ProductController {
     )
     {
         return new ResponseEntity<>(productService.getAllProducts(category,brand,color,size,maxPrice,minPrice,minDiscount,sort,stock,pageNumber),HttpStatus.OK);
+    }
+
+    @GetMapping("/{productId}")
+    public ResponseEntity<Product> getProductById(@PathVariable Long productId) throws Exception {
+        Product product=productService.findProductById(productId);
+
+        return  new ResponseEntity<>(product, HttpStatus.OK);
     }
 
 

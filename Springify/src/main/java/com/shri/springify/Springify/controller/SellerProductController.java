@@ -23,6 +23,10 @@ public class SellerProductController {
     @Autowired
     private SellerService sellerService;
 
+
+
+
+
     @GetMapping()
     public ResponseEntity<List<Product>> getProductBySellerId(
             @RequestHeader("Authorization") String jwt
@@ -32,6 +36,11 @@ public class SellerProductController {
         List<Product> products=productService.getProductBySellerId(seller.getId());
         return  new ResponseEntity<>(products, HttpStatus.OK);
     }
+
+
+
+
+
 
 
 
@@ -48,6 +57,10 @@ public class SellerProductController {
         return new ResponseEntity<>(product,HttpStatus.CREATED);
     }
 
+
+
+
+
     @DeleteMapping("/{productId}")
     public  ResponseEntity<ApiResponse> deleteProduct(@PathVariable Long productId,
     @RequestHeader("Authorization") String jwt
@@ -60,8 +73,11 @@ public class SellerProductController {
 
         return  new ResponseEntity<>(response,HttpStatus.OK);
     }
-    @PutMapping("/{productId}")
 
+
+
+
+    @PutMapping("/{productId}")
     public ResponseEntity<Product> updateProduct(
             @PathVariable Long productId,
             @RequestHeader("Authorization") String jwt,

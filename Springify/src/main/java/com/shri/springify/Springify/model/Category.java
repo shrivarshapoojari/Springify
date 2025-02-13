@@ -89,7 +89,7 @@ public class Category {
     @Column(unique = true, nullable = false, length = 50) // Adding length constraint
     private String categoryId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "parent_category_id")
     private Category parentCategory;
 
