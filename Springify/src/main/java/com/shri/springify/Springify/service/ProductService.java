@@ -16,7 +16,10 @@ public interface ProductService {
 
     Product findProductById(Long id) throws Exception;
 
-    List<Product> searchProducts();
+
+
+    List<Product> searchProducts(String query);
+
     public Page<Product> getAllProducts(
 
             String category,

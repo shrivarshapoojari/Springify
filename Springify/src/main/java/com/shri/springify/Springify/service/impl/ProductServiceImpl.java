@@ -18,7 +18,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -116,8 +115,8 @@ return productRepo.save(product);
     }
 
     @Override
-    public List<Product> searchProducts() {
-        return List.of();
+    public List<Product> searchProducts(String query) {
+         return productRepo.searchProduct(query);
     }
 
     @Override
@@ -186,6 +185,7 @@ return productRepo.save(product);
 
     @Override
     public List<Product> getProductBySellerId(Long id) {
-        return List.of();
+        return productRepo.findBySellerId(id);
+
     }
 }
