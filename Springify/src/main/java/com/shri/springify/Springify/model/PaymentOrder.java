@@ -4,15 +4,14 @@ package com.shri.springify.Springify.model;
 import com.shri.springify.Springify.domain.PaymentMethod;
 import com.shri.springify.Springify.domain.PaymentOrderStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class PaymentOrder {
@@ -24,7 +23,7 @@ public class PaymentOrder {
     private Long amount;
 
     private PaymentOrderStatus status= PaymentOrderStatus.PENDING;
-    private PaymentMethod paymentMethod;
+
     private String paymentLinkId;
 
     @ManyToOne

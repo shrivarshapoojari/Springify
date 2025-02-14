@@ -1,19 +1,21 @@
 package com.shri.springify.Springify.model;
 
 import com.shri.springify.Springify.domain.PaymentStatus;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.Embeddable;
+import lombok.*;
+import org.springframework.stereotype.Service;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Embeddable
 public class PaymentDetails {
 
-    private String paymentId;
-    private String razorpayPaymentLinkId;
-    private String razorpayPaymentLinkReferenceId;
-    private String razorpayPaymentLinkStatus;
-    private String razorpayPaymentId;
+
+    private String stripePaymentLinkId;
+    private String stripePaymentLinkReferenceId;
+    private String stripePaymentLinkStatus;
+    private String stripePaymentId;
     private PaymentStatus status;
 }

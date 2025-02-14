@@ -10,6 +10,7 @@ public interface OrderService {
     Set<Order> createOrder(String jwt, Address shippingAddress) throws Exception;
 
     Order findOrderById(Long id,String jwt) throws Exception;
+    Order findOrderByOrderId(Long id) throws Exception;
 
     List<Order> usersOrderHistory(String jwt) throws Exception;
 

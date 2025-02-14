@@ -106,6 +106,11 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public Order findOrderByOrderId(Long id) throws Exception {
+       return orderRepo.findById(id).orElseThrow(()->new Exception("Order not found"));
+    }
+
+    @Override
     public List<Order> usersOrderHistory(String jwt) throws Exception {
 
         Long userId= userService.findUserByJwt(jwt).getId();
