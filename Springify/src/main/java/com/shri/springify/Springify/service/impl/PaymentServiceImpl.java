@@ -32,6 +32,9 @@ public class PaymentServiceImpl implements PaymentService {
     @Autowired
     private OrderRepo orderRepo;
 
+
+    @Autowired
+    private  TransactionService transactionService;
     @Autowired
     private SellerService sellerService;
 
@@ -108,7 +111,7 @@ public class PaymentServiceImpl implements PaymentService {
                 report.setTotalSales(report.getTotalSales()+order.getOrderItems().size());
                 order.setOrderStatus(OrderStatus.PLACED);
                 order.setPaymentStatus(PaymentStatus.COMPLETED);
-
+                transactionService.createTransaction(order);
                 orderRepo.save(order);
                 sellerReportService.updateSellerReport(report);
             }
