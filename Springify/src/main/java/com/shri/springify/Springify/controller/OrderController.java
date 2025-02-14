@@ -6,6 +6,8 @@ import com.shri.springify.Springify.model.*;
 import com.shri.springify.Springify.response.PaymentLinkResponse;
 import com.shri.springify.Springify.service.OrderService;
 import com.shri.springify.Springify.service.PaymentService;
+import com.shri.springify.Springify.service.SellerReportService;
+import com.shri.springify.Springify.service.SellerService;
 import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,6 +26,12 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
+
+    @Autowired
+    SellerReportService sellerReportService;
+
+    @Autowired
+    private SellerService sellerService;
     @Autowired
     private PaymentService paymentService;
 
@@ -79,6 +87,14 @@ public class OrderController {
             @PathVariable Long orderId,
             @RequestHeader("Authorization") String jwt
     ) throws Exception {
+
+        Order order=orderService.findOrderById(orderId,jwt);
+      Seller seller=  sellerService.getSellerById(order.getSellerId());
+      SellerReport sellerReport=sellerReportService.getSellerReport(seller.getId());
+
+      sellerReport.setCancelledOrder(sellerReport.getCancelledOrder()+1);
+      sellerReport.setTotalRefunds((long) (order.getTotalSellingPrice()+sellerReport.getTotalRefunds()));
+      sellerReportService.updateSellerReport(sellerReport);
         return new ResponseEntity<>(orderService.cancelOrder(orderId,jwt),HttpStatus.OK);
     }
 

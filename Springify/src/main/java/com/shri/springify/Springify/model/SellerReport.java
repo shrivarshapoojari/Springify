@@ -25,7 +25,7 @@ public class SellerReport {
     private Long totalRefunds=0L;
     private Long totalTax=0L;
     private Long netEarnings=0L;
-
+    private  Long CancelledOrder=0L;
     private Integer totalOrders=0;
 
 }

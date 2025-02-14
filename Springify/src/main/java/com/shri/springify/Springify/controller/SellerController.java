@@ -3,6 +3,7 @@ package com.shri.springify.Springify.controller;
 import com.shri.springify.Springify.Utils.OtpUtil;
 import com.shri.springify.Springify.domain.AccountStatus;
 import com.shri.springify.Springify.model.Seller;
+import com.shri.springify.Springify.model.SellerReport;
 import com.shri.springify.Springify.model.VerificationCode;
 import com.shri.springify.Springify.repository.VerificationCodeRepo;
 import com.shri.springify.Springify.response.ApiResponse;
@@ -10,6 +11,7 @@ import com.shri.springify.Springify.response.AuthResponse;
 import com.shri.springify.Springify.response.LoginRequest;
 import com.shri.springify.Springify.service.AuthService;
 import com.shri.springify.Springify.service.EmailService;
+import com.shri.springify.Springify.service.SellerReportService;
 import com.shri.springify.Springify.service.SellerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -31,6 +33,9 @@ public class SellerController {
     @Autowired
     private AuthService authService;
 
+
+    @Autowired
+    private SellerReportService sellerReportService;
 
     @Autowired
     private EmailService emailService;
@@ -133,4 +138,26 @@ public class SellerController {
         response.setMessage("Deleted account successfully");
         return new ResponseEntity<>(response,HttpStatus.OK);
     }
+
+
+
+
+
+
+
+    @GetMapping("/report")
+    public  ResponseEntity<SellerReport> getSellerReport(
+            @RequestHeader("Authorization") String jwt
+    ) throws  Exception
+    {
+        Seller seller=sellerService.getSellerProfile(jwt);
+        return new ResponseEntity<>(sellerReportService.getSellerReport(seller.getId()),HttpStatus.OK);
+    }
+
+
+
+
+
+
+
 }
