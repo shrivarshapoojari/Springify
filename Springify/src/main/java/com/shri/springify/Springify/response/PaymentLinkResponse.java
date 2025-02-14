@@ -7,5 +7,5 @@ public class PaymentLinkResponse {
 
     private  String paymentLinkUrl;
     private String paymentLinkId;
-
+    private Long paymentId;
 }

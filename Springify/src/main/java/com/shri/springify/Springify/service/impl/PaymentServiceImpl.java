@@ -2,16 +2,13 @@ package com.shri.springify.Springify.service.impl;
 import com.shri.springify.Springify.domain.OrderStatus;
 import com.shri.springify.Springify.domain.PaymentOrderStatus;
 import com.shri.springify.Springify.domain.PaymentStatus;
-import com.shri.springify.Springify.service.OrderService;
+import com.shri.springify.Springify.model.*;
+import com.shri.springify.Springify.response.PaymentLinkResponse;
+import com.shri.springify.Springify.service.*;
 import com.stripe.model.PaymentIntent;
 import com.stripe.model.checkout.Session;
-import com.shri.springify.Springify.model.Order;
-import com.shri.springify.Springify.model.PaymentOrder;
-import com.shri.springify.Springify.model.User;
 import com.shri.springify.Springify.repository.OrderRepo;
 import com.shri.springify.Springify.repository.PaymentOrderRepo;
-import com.shri.springify.Springify.service.PaymentService;
-import com.shri.springify.Springify.service.UserService;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Event;
@@ -34,6 +31,12 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Autowired
     private OrderRepo orderRepo;
+
+    @Autowired
+    private SellerService sellerService;
+
+    @Autowired
+    private SellerReportService sellerReportService;
 
     @Autowired
     private OrderService orderService;
@@ -98,10 +101,16 @@ public class PaymentServiceImpl implements PaymentService {
 
             for(Order order:orders)
             {
-
+                Long sellerId=order.getSellerId();
+                SellerReport report=sellerReportService.getSellerReport(sellerId);
+                report.setTotalOrders(report.getTotalOrders()+1);
+                report.setTotalEarnings((long) (report.getTotalEarnings()+order.getTotalSellingPrice()));
+                report.setTotalSales(report.getTotalSales()+order.getOrderItems().size());
                 order.setOrderStatus(OrderStatus.PLACED);
                 order.setPaymentStatus(PaymentStatus.COMPLETED);
+
                 orderRepo.save(order);
+                sellerReportService.updateSellerReport(report);
             }
 
 
@@ -148,7 +157,7 @@ public class PaymentServiceImpl implements PaymentService {
 
 
     @Override
-    public String createStripePaymentLink(Long paymentOrderId) throws Exception {
+    public PaymentLinkResponse createStripePaymentLink(Long paymentOrderId) throws Exception {
 
 
         PaymentOrder paymentOrder=paymentOrderRepo.findById(paymentOrderId).orElseThrow(()->new Exception("Order not found"));
@@ -184,6 +193,10 @@ public class PaymentServiceImpl implements PaymentService {
         Session session = Session.create(params);
         paymentOrder.setPaymentLinkId(session.getId());
         paymentOrderRepo.save(paymentOrder);
-        return session.getUrl();
+        PaymentLinkResponse paymentLinkResponse=new PaymentLinkResponse();
+        paymentLinkResponse.setPaymentLinkUrl(session.getUrl());
+        paymentLinkResponse.setPaymentLinkId(session.getId());
+        paymentLinkResponse.setPaymentId(paymentOrder.getId());
+        return  paymentLinkResponse;
     }
 }
