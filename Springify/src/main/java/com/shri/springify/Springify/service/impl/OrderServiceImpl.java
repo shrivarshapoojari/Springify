@@ -1,20 +1,23 @@
 package com.shri.springify.Springify.service.impl;
 
 import com.shri.springify.Springify.domain.OrderStatus;
+import com.shri.springify.Springify.domain.PaymentOrderStatus;
 import com.shri.springify.Springify.domain.PaymentStatus;
 import com.shri.springify.Springify.model.*;
 import com.shri.springify.Springify.repository.AddressRepo;
 import com.shri.springify.Springify.repository.OrderItemRepo;
 import com.shri.springify.Springify.repository.OrderRepo;
+import com.shri.springify.Springify.repository.PaymentOrderRepo;
 import com.shri.springify.Springify.service.CartService;
 import com.shri.springify.Springify.service.OrderService;
 import com.shri.springify.Springify.service.SellerService;
 import com.shri.springify.Springify.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
+@Service
 public class OrderServiceImpl implements OrderService {
 
     @Autowired
@@ -34,10 +37,14 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     OrderItemRepo orderItemRepo;
 
+    @Autowired
+    PaymentOrderRepo paymentOrderRepo;
+
     @Override
     public Set<Order> createOrder(String jwt, Address shippingAddress) throws Exception {
         User user=userService.findUserByJwt(jwt);
         Cart cart=cartService.findUsersCart(jwt);
+        Long totalOrderValue=0L;
         if(!user.getAddresses().contains(shippingAddress))
         {
             user.getAddresses().add(shippingAddress);
@@ -66,7 +73,7 @@ public class OrderServiceImpl implements OrderService {
             createdOrder.setShippingAddress(address);
             createdOrder.setOrderStatus(OrderStatus.PENDING);
             createdOrder.setPaymentStatus(PaymentStatus.PENDING);
-
+            totalOrderValue+=totalOrderPrice;
             Order savedOrder=orderRepo.save(createdOrder);
             orders.add(savedOrder);
 
@@ -88,7 +95,12 @@ public class OrderServiceImpl implements OrderService {
                 OrderItem savedOrderItem=orderItemRepo.save(orderItem);
             }
         }
-
+        PaymentOrder paymentOrder=new PaymentOrder();
+        paymentOrder.setOrders(orders);
+        paymentOrder.setAmount(totalOrderValue);
+        paymentOrder.setUser(user);
+        paymentOrder.setStatus(PaymentOrderStatus.PENDING);
+        paymentOrderRepo.save(paymentOrder);
         return orders;
 
 

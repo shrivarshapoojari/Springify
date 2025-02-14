@@ -1,5 +1,7 @@
 package com.shri.springify.Springify.service.impl;
+import com.shri.springify.Springify.domain.OrderStatus;
 import com.shri.springify.Springify.domain.PaymentOrderStatus;
+import com.shri.springify.Springify.domain.PaymentStatus;
 import com.shri.springify.Springify.service.OrderService;
 import com.stripe.model.PaymentIntent;
 import com.stripe.model.checkout.Session;
@@ -68,13 +70,10 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public void proceedPaymentOrder(Event event) {
+    public void proceedPaymentOrder(Event event) throws Exception {
         switch (event.getType()) {
-            case "checkout.session.completed":
+            case "checkout.session.completed", "payment_intent.succeeded":
                 handlePaymentSuccess(event);
-                break;
-            case "payment_intent.succeeded":
-                handlePaymentIntentSuccess(event);
                 break;
             case "payment_intent.payment_failed":
                 handlePaymentFailure(event);
@@ -88,55 +87,78 @@ public class PaymentServiceImpl implements PaymentService {
         Session session = (Session) event.getDataObjectDeserializer().getObject().orElse(null);
         if (session != null) {
             Map<String, String> metadata = session.getMetadata();
-            Long orderId = Long.valueOf(metadata.get("order_id"));
-            Set<Order> orders=orderService.findOrderById()
+            Long paymentOrderId = Long.valueOf(metadata.get("paymentOrder_id"));
+            PaymentOrder paymentOrder=paymentOrderRepo.findById(paymentOrderId).orElseThrow(()->new Exception(" Payment Order not found"));
+            Set<Order> orders=paymentOrder.getOrders();
             String userEmail =metadata.get("user_email");
-            User user=userService.findUserByEmail(userEmail);
-            String paymentLinkId=event.getId();
-            PaymentOrder paymentOrder=new PaymentOrder();
+
+
+
             paymentOrder.setStatus(PaymentOrderStatus.SUCESS);
-            paymentOrder.setPaymentLinkId(paymentLinkId);
-            paymentOrder.setUser(user);
-            paymentOrder.setOrders();
-            System.out.println("Payment Successful for Order ID: " + orderId + ", User ID: " + userId);
+
+            for(Order order:orders)
+            {
+
+                order.setOrderStatus(OrderStatus.PLACED);
+                order.setPaymentStatus(PaymentStatus.COMPLETED);
+                orderRepo.save(order);
+            }
+
+
+
+
+            System.out.println("Payment Successful for Order ID: " + paymentOrderId + ", User ID: " + userEmail);
 
         }
     }
 
-    private void handlePaymentIntentSuccess(Event event) {
+
+
+    private void handlePaymentFailure(Event event) throws Exception {
         PaymentIntent paymentIntent = (PaymentIntent) event.getDataObjectDeserializer().getObject().orElse(null);
         if (paymentIntent != null) {
             Map<String, String> metadata = paymentIntent.getMetadata();
-            String orderId = metadata.get("order_id");
-            String userId = metadata.get("user_id");
+            Long paymentOrderId = Long.valueOf(metadata.get("paymentOrder_id"));
 
-            System.out.println("Payment Intent Succeeded for Order ID: " + orderId + ", User ID: " + userId);
-            // Process order fulfillment
-        }
-    }
 
-    private void handlePaymentFailure(Event event) {
-        PaymentIntent paymentIntent = (PaymentIntent) event.getDataObjectDeserializer().getObject().orElse(null);
-        if (paymentIntent != null) {
-            Map<String, String> metadata = paymentIntent.getMetadata();
-            String orderId = metadata.get("order_id");
-            String userId = metadata.get("user_id");
+            PaymentOrder paymentOrder=paymentOrderRepo.findById(paymentOrderId).orElseThrow(()->new Exception(" Payment Order not found"));
+            Set<Order> orders=paymentOrder.getOrders();
+            String userEmail =metadata.get("user_email");
 
-            System.out.println("Payment Failed for Order ID: " + orderId + ", User ID: " + userId);
-            // Handle payment failure scenario
+
+
+            paymentOrder.setStatus(PaymentOrderStatus.FAILED);
+
+            for(Order order:orders)
+            {
+
+                order.setOrderStatus(OrderStatus.FAILED);
+                order.setPaymentStatus(PaymentStatus.FAILED);
+                orderRepo.save(order);
+            }
+
+
+
+
+            System.out.println("Payment Failed for Order ID: " + paymentOrderId + ", User ID: " + userEmail);
+
         }
     }
 
 
 
     @Override
-    public String createStripePaymentLink(User user, Long amount, Long orderId) throws StripeException {
+    public String createStripePaymentLink(Long paymentOrderId) throws Exception {
 
+
+        PaymentOrder paymentOrder=paymentOrderRepo.findById(paymentOrderId).orElseThrow(()->new Exception("Order not found"));
+        User user=paymentOrder.getUser();
+        Long amount=paymentOrder.getAmount();
 
         Stripe.apiKey = stripeSecret;
 
         Map<String, String> metadata = new HashMap<>();
-        metadata.put("order_id", orderId.toString());
+        metadata.put("paymentOrder_id", paymentOrderId.toString());
         metadata.put("user_email", user.getEmail());
 
         SessionCreateParams params = SessionCreateParams.builder()
@@ -145,7 +167,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .setSuccessUrl("http://localhost:8080/payment/success")
                 .setCancelUrl("http://localhost:8080/payment/cancel")
                 .setCustomerEmail(user.getEmail())
-                .setClientReferenceId(orderId.toString())
+                .setClientReferenceId(paymentOrderId.toString())
                 .putAllMetadata(metadata)
                 .addLineItem(SessionCreateParams.LineItem.builder()
                         .setQuantity(1L)
@@ -160,6 +182,8 @@ public class PaymentServiceImpl implements PaymentService {
                 .build();
 
         Session session = Session.create(params);
+        paymentOrder.setPaymentLinkId(session.getId());
+        paymentOrderRepo.save(paymentOrder);
         return session.getUrl();
     }
 }

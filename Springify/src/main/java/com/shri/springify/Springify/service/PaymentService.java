@@ -15,7 +15,7 @@ public interface PaymentService {
 
     PaymentOrder getPaymentOrderByPaymentLinkId(String paymentOrderId) throws Exception;
 
-    void proceedPaymentOrder(Event event);
+    void proceedPaymentOrder(Event event) throws Exception;
 
-   String createStripePaymentLink(User user,Long amount,Long orderId) throws StripeException;
+   String createStripePaymentLink(Long orderId) throws Exception;
 }
