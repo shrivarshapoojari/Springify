@@ -91,12 +91,11 @@ package com.shri.springify.Springify.model;
 import com.shri.springify.Springify.domain.AccountStatus;
 import com.shri.springify.Springify.domain.USER_ROLE;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class Seller {

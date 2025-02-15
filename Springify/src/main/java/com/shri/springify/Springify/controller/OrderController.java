@@ -38,14 +38,23 @@ public class OrderController {
     @PostMapping("/buy")
     public ResponseEntity<PaymentLinkResponse> createOrder(
             @RequestBody Address shippingAddress,
-            @RequestParam PaymentMethod paymentMethod,
+
             @RequestHeader("Authorization") String jwt
             ) throws Exception
     {
 
         Set<Order>orders=orderService.createOrder(jwt,shippingAddress);
         PaymentOrder paymentOrder=paymentService.createOrder(jwt,orders);
-        return  null;
+
+        PaymentLinkResponse response=new PaymentLinkResponse();
+
+        PaymentLinkResponse paymentLinkResponse=paymentService.createStripePaymentLink(paymentOrder.getId());
+        response.setPaymentLinkUrl(paymentLinkResponse.getPaymentLinkUrl());
+        response.setPaymentLinkId(paymentLinkResponse.getPaymentLinkId());
+        response.setPaymentId(paymentLinkResponse.getPaymentId());
+        return new ResponseEntity<>(paymentLinkResponse,HttpStatus.OK);
+
+
     }
 
 

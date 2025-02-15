@@ -17,7 +17,7 @@ import java.util.Set;
 public class PaymentOrder {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private  Long id;
 
     private Long amount;
@@ -29,7 +29,7 @@ public class PaymentOrder {
     @ManyToOne
     private  User user;
 
-    @OneToMany
+    @OneToMany(mappedBy = "paymentOrder", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Order> orders=new HashSet<>();
 
 
