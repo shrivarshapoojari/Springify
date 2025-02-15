@@ -80,15 +80,13 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false, length = 50) // Ensuring uniqueness and length limit
+    @Column(unique = true, nullable = false) // Ensuring uniqueness and length limit
     private String orderId;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-//    @ManyToOne
-//    @JoinColumn(name = "seller_id", nullable = false)
     private Long sellerId;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -127,6 +125,9 @@ public class Order {
     @Column(nullable = false)
     private LocalDateTime deliverDate;
 
+    @ManyToOne
+    @JoinColumn(name = "payment_order_id")
+    private PaymentOrder paymentOrder;
     @PrePersist
     protected void onCreate() {
         this.deliverDate = this.orderDate.plusDays(7); // Ensures correct initialization

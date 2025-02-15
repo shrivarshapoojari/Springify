@@ -65,6 +65,8 @@ public class OrderServiceImpl implements OrderService {
                     .sum();
 
             Order createdOrder = new Order();
+
+            createdOrder.setOrderId(UUID.randomUUID().toString());
             createdOrder.setUser(user);
             createdOrder.setSellerId(sellerId);
             createdOrder.setTotalMrpPrice(totalOrderPrice);

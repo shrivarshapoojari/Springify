@@ -77,11 +77,13 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public void proceedPaymentOrder(Event event) throws Exception {
+        System.out.println("EVENT TYPE");
+        System.out.println(event.getType());
         switch (event.getType()) {
             case "checkout.session.completed", "payment_intent.succeeded":
                 handlePaymentSuccess(event);
                 break;
-            case "payment_intent.payment_failed":
+            case "payment_intent.payment_failed","checkout.session.async_payment_failed":
                 handlePaymentFailure(event);
                 break;
             default:
@@ -92,16 +94,17 @@ public class PaymentServiceImpl implements PaymentService {
     private void handlePaymentSuccess(Event event) throws Exception {
         Session session = (Session) event.getDataObjectDeserializer().getObject().orElse(null);
         if (session != null) {
+            System.out.println(session.getMetadata());
             Map<String, String> metadata = session.getMetadata();
             Long paymentOrderId = Long.valueOf(metadata.get("paymentOrder_id"));
             PaymentOrder paymentOrder=paymentOrderRepo.findById(paymentOrderId).orElseThrow(()->new Exception(" Payment Order not found"));
             Set<Order> orders=paymentOrder.getOrders();
             String userEmail =metadata.get("user_email");
 
-
+            System.out.println("SUCESS__________________________________________________________");
 
             paymentOrder.setStatus(PaymentOrderStatus.SUCESS);
-
+            paymentOrderRepo.save(paymentOrder);
             for(Order order:orders)
             {
                 Long sellerId=order.getSellerId();
@@ -150,6 +153,7 @@ public class PaymentServiceImpl implements PaymentService {
             }
 
 
+            System.out.println("Failed__________________________________________________________");
 
 
             System.out.println("Payment Failed for Order ID: " + paymentOrderId + ", User ID: " + userEmail);

@@ -38,7 +38,7 @@ public class OrderController {
     @PostMapping("/buy")
     public ResponseEntity<PaymentLinkResponse> createOrder(
             @RequestBody Address shippingAddress,
-            @RequestParam PaymentMethod paymentMethod,
+
             @RequestHeader("Authorization") String jwt
             ) throws Exception
     {
