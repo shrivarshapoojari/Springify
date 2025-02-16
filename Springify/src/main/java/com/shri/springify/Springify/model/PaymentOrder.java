@@ -1,6 +1,7 @@
 package com.shri.springify.Springify.model;
 
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.shri.springify.Springify.domain.PaymentMethod;
 import com.shri.springify.Springify.domain.PaymentOrderStatus;
 import jakarta.persistence.*;
@@ -29,7 +30,8 @@ public class PaymentOrder {
     @ManyToOne
     private  User user;
 
-    @OneToMany(mappedBy = "paymentOrder", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    @OneToMany(mappedBy = "paymentOrder", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.EAGER)
     private Set<Order> orders=new HashSet<>();
 
 

@@ -58,6 +58,7 @@
 
 package com.shri.springify.Springify.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.shri.springify.Springify.domain.OrderStatus;
 import com.shri.springify.Springify.domain.PaymentStatus;
 import jakarta.persistence.*;
@@ -92,7 +93,7 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "shipping_address_id", nullable = false)
     private Address shippingAddress;
 
@@ -126,6 +127,7 @@ public class Order {
     private LocalDateTime deliverDate;
 
     @ManyToOne
+    @JsonBackReference
     @JoinColumn(name = "payment_order_id")
     private PaymentOrder paymentOrder;
     @PrePersist

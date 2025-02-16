@@ -43,12 +43,14 @@ public class OrderController {
             ) throws Exception
     {
 
-        Set<Order>orders=orderService.createOrder(jwt,shippingAddress);
-        PaymentOrder paymentOrder=paymentService.createOrder(jwt,orders);
+        Long paymentOrderId=orderService.createOrder(jwt,shippingAddress);
+        System.out.print("In controller ");
+
+
 
         PaymentLinkResponse response=new PaymentLinkResponse();
 
-        PaymentLinkResponse paymentLinkResponse=paymentService.createStripePaymentLink(paymentOrder.getId());
+        PaymentLinkResponse paymentLinkResponse=paymentService.createStripePaymentLink(paymentOrderId);
         response.setPaymentLinkUrl(paymentLinkResponse.getPaymentLinkUrl());
         response.setPaymentLinkId(paymentLinkResponse.getPaymentLinkId());
         response.setPaymentId(paymentLinkResponse.getPaymentId());
