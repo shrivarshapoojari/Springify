@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.stripe.model.Event;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 @Service
@@ -54,7 +55,12 @@ public class PaymentServiceImpl implements PaymentService {
          paymentOrder.setAmount((long) amount);
          paymentOrder.setUser(user);
          paymentOrder.setOrders(orders);
-         return  paymentOrderRepo.save(paymentOrder);
+
+       PaymentOrder saved=  paymentOrderRepo.save(paymentOrder);
+        System.out.println("Inside paymentserviceimpl");
+        System.out.println(saved.toString());
+        System.out.println("In paymentorder create oreder order size "+ saved.getOrders().size());
+        return saved;
 
     }
 
@@ -77,7 +83,6 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public void proceedPaymentOrder(Event event) throws Exception {
-        System.out.println("EVENT TYPE");
         System.out.println(event.getType());
         switch (event.getType()) {
             case "checkout.session.completed", "payment_intent.succeeded":
@@ -94,19 +99,25 @@ public class PaymentServiceImpl implements PaymentService {
     private void handlePaymentSuccess(Event event) throws Exception {
         Session session = (Session) event.getDataObjectDeserializer().getObject().orElse(null);
         if (session != null) {
-            System.out.println(session.getMetadata());
+
             Map<String, String> metadata = session.getMetadata();
             Long paymentOrderId = Long.valueOf(metadata.get("paymentOrder_id"));
-            PaymentOrder paymentOrder=paymentOrderRepo.findById(paymentOrderId).orElseThrow(()->new Exception(" Payment Order not found"));
+            System.out.println("paymentOrderid"+paymentOrderId);
+//            PaymentOrder paymentOrder=new PaymentOrder();
+//            Set<Order> orders=new HashSet<>();
+            PaymentOrder paymentOrder = paymentOrderRepo.findByIdWithOrders(paymentOrderId);
             Set<Order> orders=paymentOrder.getOrders();
+            System.out.println("ORDERS");
+            System.out.println(orders.size());
             String userEmail =metadata.get("user_email");
 
-            System.out.println("SUCESS__________________________________________________________");
 
             paymentOrder.setStatus(PaymentOrderStatus.SUCESS);
             paymentOrderRepo.save(paymentOrder);
             for(Order order:orders)
             {
+                System.out.println("SUCESS__________________________________________________________");
+
                 Long sellerId=order.getSellerId();
                 SellerReport report=sellerReportService.getSellerReport(sellerId);
                 report.setTotalOrders(report.getTotalOrders()+1);
@@ -115,7 +126,9 @@ public class PaymentServiceImpl implements PaymentService {
                 order.setOrderStatus(OrderStatus.PLACED);
                 order.setPaymentStatus(PaymentStatus.COMPLETED);
                 transactionService.createTransaction(order);
-                orderRepo.save(order);
+                Order savedOrder= orderRepo.save(order);
+                System.out.println("ORDER SUCCESS");
+                System.out.println(savedOrder.getPaymentStatus());
                 sellerReportService.updateSellerReport(report);
             }
 

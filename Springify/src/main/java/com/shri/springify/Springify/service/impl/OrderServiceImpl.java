@@ -14,6 +14,7 @@ import com.shri.springify.Springify.service.SellerService;
 import com.shri.springify.Springify.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -40,19 +41,111 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     PaymentOrderRepo paymentOrderRepo;
 
+
     @Override
-    public Set<Order> createOrder(String jwt, Address shippingAddress) throws Exception {
-        User user=userService.findUserByJwt(jwt);
-        Cart cart=cartService.findUsersCart(jwt);
-        Long totalOrderValue=0L;
-        if(!user.getAddresses().contains(shippingAddress))
-        {
+    @Transactional
+    public Long createOrder(String jwt, Address shippingAddress) throws Exception {
+//        User user=userService.findUserByJwt(jwt);
+//        Cart cart=cartService.findUsersCart(jwt);
+//        Long totalOrderValue=0L;
+//        if(!user.getAddresses().contains(shippingAddress))
+//        {
+//            user.getAddresses().add(shippingAddress);
+//        }
+//        Address address=addressRepo.save(shippingAddress);
+//
+//        Map<Long,List<CartItem>> itemsBySeller=cart.getCartItems().stream().collect(Collectors.groupingBy(item->item.getProduct().getSeller().getId()));
+//     Set<Order> orders=new HashSet<>();
+//        for (Map.Entry<Long, List<CartItem>> entry : itemsBySeller.entrySet()) {
+//            Long sellerId = entry.getKey();
+//            List<CartItem> items = entry.getValue();
+//
+//            int totalOrderPrice = items.stream()
+//                    .mapToInt(CartItem::getSellingPrice)
+//                    .sum();
+//            int totalItem = items.stream()
+//                    .mapToInt(CartItem::getQuantity)
+//                    .sum();
+//
+//            Order createdOrder = new Order();
+//
+//            createdOrder.setOrderId(UUID.randomUUID().toString());
+//            createdOrder.setUser(user);
+//            createdOrder.setSellerId(sellerId);
+//            createdOrder.setTotalMrpPrice(totalOrderPrice);
+//            createdOrder.setTotalSellingPrice(totalOrderPrice);
+//            createdOrder.setTotalItem(totalItem);
+//            createdOrder.setShippingAddress(address);
+//            createdOrder.setOrderStatus(OrderStatus.PENDING);
+//            createdOrder.setPaymentStatus(PaymentStatus.PENDING);
+//            totalOrderValue+=totalOrderPrice;
+//            Order savedOrder=orderRepo.save(createdOrder);
+//            orders.add(savedOrder);
+//
+//            List<OrderItem> orderItems=new ArrayList<>();
+//
+//            for(CartItem item:items)
+//            {
+//                OrderItem orderItem=new OrderItem();
+//                orderItem.setOrder(savedOrder);
+//                orderItem.setMrpPrice(item.getMrpPrice());
+//                orderItem.setProduct(item.getProduct());
+//                orderItem.setQuantity(item.getQuantity());
+//                orderItem.setSize(item.getSize());
+//                orderItem.setUserId(createdOrder.getUser().getId());
+//                orderItem.setSellingPrice(item.getSellingPrice());
+//
+//                savedOrder.getOrderItems().add(orderItem);
+//
+//                OrderItem savedOrderItem=orderItemRepo.save(orderItem);
+//            }
+//        }
+//        PaymentOrder paymentOrder=new PaymentOrder();
+//        paymentOrder.setOrders(orders);
+//        paymentOrder.setAmount(totalOrderValue);
+//        paymentOrder.setUser(user);
+//        paymentOrder.setStatus(PaymentOrderStatus.PENDING);
+//       PaymentOrder savedOrder= paymentOrderRepo.save(paymentOrder);
+//
+//
+//        return savedOrder.getId();
+
+
+
+
+
+
+
+
+
+
+
+        User user = userService.findUserByJwt(jwt);
+        Cart cart = cartService.findUsersCart(jwt);
+        Long totalOrderValue = 0L;
+
+        // Add shipping address if not already present
+        if (!user.getAddresses().contains(shippingAddress)) {
             user.getAddresses().add(shippingAddress);
         }
-        Address address=addressRepo.save(shippingAddress);
+        Address address = addressRepo.save(shippingAddress);
 
-        Map<Long,List<CartItem>> itemsBySeller=cart.getCartItems().stream().collect(Collectors.groupingBy(item->item.getProduct().getSeller().getId()));
-     Set<Order> orders=new HashSet<>();
+        // Group cart items by seller
+        Map<Long, List<CartItem>> itemsBySeller = cart.getCartItems().stream()
+                .collect(Collectors.groupingBy(item -> item.getProduct().getSeller().getId()));
+
+        // Create a new PaymentOrder
+        PaymentOrder paymentOrder = new PaymentOrder();
+        paymentOrder.setAmount(0L);
+        paymentOrder.setUser(user);
+        paymentOrder.setStatus(PaymentOrderStatus.PENDING);
+
+        // Save PaymentOrder first (to ensure ID is generated)
+        paymentOrder = paymentOrderRepo.save(paymentOrder);
+
+        // Initialize Orders Set
+        Set<Order> orders = new HashSet<>();
+
         for (Map.Entry<Long, List<CartItem>> entry : itemsBySeller.entrySet()) {
             Long sellerId = entry.getKey();
             List<CartItem> items = entry.getValue();
@@ -64,8 +157,8 @@ public class OrderServiceImpl implements OrderService {
                     .mapToInt(CartItem::getQuantity)
                     .sum();
 
+            // Create Order
             Order createdOrder = new Order();
-
             createdOrder.setOrderId(UUID.randomUUID().toString());
             createdOrder.setUser(user);
             createdOrder.setSellerId(sellerId);
@@ -75,35 +168,41 @@ public class OrderServiceImpl implements OrderService {
             createdOrder.setShippingAddress(address);
             createdOrder.setOrderStatus(OrderStatus.PENDING);
             createdOrder.setPaymentStatus(PaymentStatus.PENDING);
-            totalOrderValue+=totalOrderPrice;
-            Order savedOrder=orderRepo.save(createdOrder);
-            orders.add(savedOrder);
+            createdOrder.setPaymentOrder(paymentOrder); // Set the PaymentOrder
 
-            List<OrderItem> orderItems=new ArrayList<>();
+            totalOrderValue += totalOrderPrice;
 
-            for(CartItem item:items)
-            {
-                OrderItem orderItem=new OrderItem();
-                orderItem.setOrder(savedOrder);
-                orderItem.setMrpPrice(item.getMrpPrice());
-                orderItem.setProduct(item.getProduct());
-                orderItem.setQuantity(item.getQuantity());
-                orderItem.setSize(item.getSize());
-                orderItem.setUserId(createdOrder.getUser().getId());
-                orderItem.setSellingPrice(item.getSellingPrice());
-
-                savedOrder.getOrderItems().add(orderItem);
-
-                OrderItem savedOrderItem=orderItemRepo.save(orderItem);
-            }
+            // Add Order to Set
+            orders.add(createdOrder);
         }
-        PaymentOrder paymentOrder=new PaymentOrder();
-        paymentOrder.setOrders(orders);
+
+        // Save Orders
+        orderRepo.saveAll(orders);
+
+        // Associate Orders with PaymentOrder
+        paymentOrder.getOrders().clear(); // Ensure no stale data
+        paymentOrder.getOrders().addAll(orders);
         paymentOrder.setAmount(totalOrderValue);
-        paymentOrder.setUser(user);
-        paymentOrder.setStatus(PaymentOrderStatus.PENDING);
-        paymentOrderRepo.save(paymentOrder);
-        return orders;
+
+        // Save PaymentOrder again with updated orders
+        paymentOrder = paymentOrderRepo.save(paymentOrder);
+
+        return paymentOrder.getId();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     }
